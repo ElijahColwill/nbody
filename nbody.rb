@@ -1,46 +1,79 @@
 require "gosu"
-require "./body"
-require "./planet"
 require_relative "z_order"
 
 class NbodySimulation < Gosu::Window
 
-  def initialize
+  def initialize(file)
     super(640, 640, false)
     self.caption = "NBody simulation"
     @background_image = Gosu::Image.new("images/space.jpg", tileable: true)
-    simulation = Body.new("simulations/planets.txt")
-    @x, @y, @x_vel, @y_vel, @mass, @image, @planets, @radius = simulation.return
-    @items = []
-    @earth = Planet.new(@x[0], @y[0], @x_vel[0], @y_vel[0], @mass[0], @image[0], @radius)
-    @mars = Planet.new(@x[1], @y[1], @x_vel[1], @y_vel[1], @mass[1], @image[1], @radius)
-    @mercury = Planet.new(@x[2], @y[2], @x_vel[2], @y_vel[2], @mass[2], @image[2], @radius)
-    @sun = Planet.new(@x[3], @y[3], @x_vel[3], @y_vel[3], @mass[3], @image[3], @radius)
-    @mars = Planet.new(@x[4], @y[4], @x_vel[4], @y_vel[4], @mass[4], @image[4], @radius)
+    @bodies = readfile(file)
+  end
+
+  def readfile(filename)
+    number_of_bodies = 0
+    radius = 0
+    bodies = []
+    File.open("./simulations/#{filename}") do |file|
+      file.each_line.with_index do |line, i|
+        line = 0
+        if line == "\n"
+          next
+        end
+        if line == 0 
+          number_of_bodies = line
+          line += 1
+        elsif line == 1
+          radius = line
+          line += 1
+        else
+          body = line.split(" ")
+          if body[0] == nil
+            next 
+          end
+          if body[0] == "Creator"
+            break
+          end
+          bodies.push(Body.new(body[0], body[1], body[2], body[3], body[4], body[5]))
+        end
+      end
+      return bodies
+    end
+  end
+
+  def convert(x, y, image)
+    x_coordinate = ((320 * x) / radius) + 320 - (image.width / 2)
+    y_coordinate = ((320 * y) / radius) + 320 - (img.height / 2)
+    return x_coordinate, y_coordinate
   end
 
   def update
-    @earth
-    @mars
-    @mercury
-    @sun
-    @mars
+    @bodies.each do |body|
+      body.set_coordinates(bodies)
+    end
   end
 
   def draw
     @background_image.draw(0, 0, ZOrder::Background)
-    @earth.draw
-    @mars.draw
-    @mercury.draw
-    @sun.draw
-    @mars.draw
+    @bodies.each do |body|
+      image = Gosu::Image.new("images/#{body.image}")
+      x_coordinate, y_coordinate = convert(body.x, body.y, image)
+      image.draw(x_coordinate, y_coordinate, ZOrder::Body)
+    end
   end
 
   def button_down(id)
     close if id == Gosu::KbEscape
   end
-  
+    
 end
 
-window = NbodySimulation.new
+if ARGV.length == 0
+  file = "planets.txt"
+else
+  input = ARGV
+  file = input[0]
+end
+
+window = NbodySimulation.new(file)
 window.show
