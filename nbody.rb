@@ -1,4 +1,5 @@
 require "gosu"
+require './body'
 require_relative "z_order"
 
 class NbodySimulation < Gosu::Window
@@ -14,28 +15,26 @@ class NbodySimulation < Gosu::Window
     number_of_bodies = 0
     radius = 0
     bodies = []
-    File.open("./simulations/#{filename}") do |file|
-      file.each_line.with_index do |line, i|
-        line = 0
-        if line == "\n"
-          next
+    File.open("./simulations/#{filename}").each do |line|
+      body = line.split(" ")
+      linex = 0
+      if line == "\n"
+        next
+      end
+      if line == 0 
+        number_of_bodies = line
+        linex += 1
+      elsif line == 1
+        radius = line
+        linex += 1
+      else
+        if body[0] == nil
+          next 
         end
-        if line == 0 
-          number_of_bodies = line
-          line += 1
-        elsif line == 1
-          radius = line
-          line += 1
-        else
-          body = line.split(" ")
-          if body[0] == nil
-            next 
-          end
-          if body[0] == "Creator"
-            break
-          end
-          bodies.push(Body.new(body[0], body[1], body[2], body[3], body[4], body[5]))
+        if body[0] == "Creator"
+          break
         end
+        bodies.push(Body.new(body[0], body[1], body[2], body[3], body[4], body[5]))
       end
       return bodies
     end
@@ -49,7 +48,7 @@ class NbodySimulation < Gosu::Window
 
   def update
     @bodies.each do |body|
-      body.set_coordinates(bodies)
+      body.set_coordinates(@bodies)
     end
   end
 
