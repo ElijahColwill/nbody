@@ -11,21 +11,40 @@ class NbodySimulation < Gosu::Window
     @bodies, @radius = readfile(file)
   end
 
+
   def readfile(filename)
     number_of_bodies = 0
     radius = 0
     bodies = []
-    File.open("./simulations/#{filename}").each_with_index do |line, i|
+    line_num = 0
+    File.open("./simulations/#{filename}").each do |line|
       body_property = line.split(" ")
-      if i == 0 
+      if line == ""
+        next
+      end
+      if body_property[0] == "Creator" || body_property[0] == "//"
+        break
+      end
+      if line[0,1] != "-"
+        if is_i?(line[0,1]) == false
+          next
+        end
+      end
+      if line_num == 0 
         number_of_bodies = line.to_i
-      elsif i == 1
+        line_num += 1
+      elsif line_num == 1
         radius = line.to_f
+        line_num += 1
       else
         bodies.push(Body.new(body_property[0], body_property[1], body_property[2], body_property[3], body_property[4], body_property[5]))
       end
     end
     return bodies, radius
+  end
+
+  def is_i?(string)
+    !!(string =~ /\A[-+]?[0-9]+\z/)
   end
 
   def update
