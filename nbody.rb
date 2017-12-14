@@ -8,42 +8,24 @@ class NbodySimulation < Gosu::Window
     super(640, 640, false)
     self.caption = "NBody simulation"
     @background_image = Gosu::Image.new("images/space.jpg", tileable: true)
-    @bodies = readfile(file)
+    @bodies, @radius = readfile(file)
   end
 
   def readfile(filename)
     number_of_bodies = 0
     radius = 0
     bodies = []
-    File.open("./simulations/#{filename}").each do |line|
-      body = line.split(" ")
-      linex = 0
-      if line == "\n"
-        next
-      end
-      if line == 0 
-        number_of_bodies = line
-        linex += 1
-      elsif line == 1
-        radius = line
-        linex += 1
+    File.open("./simulations/#{filename}").each_with_index do |line, i|
+      body_property = line.split(" ")
+      if i == 0 
+        number_of_bodies = line.to_i
+      elsif i == 1
+        radius = line.to_f
       else
-        if body[0] == nil
-          next 
-        end
-        if body[0] == "Creator"
-          break
-        end
-        bodies.push(Body.new(body[0], body[1], body[2], body[3], body[4], body[5]))
+        bodies.push(Body.new(body_property[0], body_property[1], body_property[2], body_property[3], body_property[4], body_property[5]))
       end
-      return bodies
     end
-  end
-
-  def convert(x, y, image)
-    x_coordinate = ((320 * x) / radius) + 320 - (image.width / 2)
-    y_coordinate = ((320 * y) / radius) + 320 - (img.height / 2)
-    return x_coordinate, y_coordinate
+    return bodies, radius
   end
 
   def update
@@ -55,9 +37,7 @@ class NbodySimulation < Gosu::Window
   def draw
     @background_image.draw(0, 0, ZOrder::Background)
     @bodies.each do |body|
-      image = Gosu::Image.new("images/#{body.image}")
-      x_coordinate, y_coordinate = convert(body.x, body.y, image)
-      image.draw(x_coordinate, y_coordinate, ZOrder::Body)
+      body.draw(@radius)
     end
   end
 

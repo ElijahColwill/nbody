@@ -1,5 +1,6 @@
 require "gosu"
 require 'mathn'
+require './z_order'
 require_relative "z_order"
 
 class Body
@@ -24,24 +25,25 @@ class Body
     def how_far(body1, body2)
     	dx = (body2.x - body1.x)
     	dy = (body2.y - body1.y)
+        return [dx, dy]
     end
 
     def length(body1, body2)
     	distance = how_far(body1, body2)
-        return Math.sqrt((distance[0] * distance[0]) + (distance[1] * distance[1])
+        return Math.sqrt((distance[0] * distance[0]) + (distance[1] * distance[1]))
     end
 
-    def force(mass1, mass2, r)
+    def forcex(mass1, mass2, r)
     	g = 6.67408e-11
     	return (g * mass1 * mass2) / (r ** 2)
     end
 
-    def force_directional(force, distance, radius)
-    	return (distance / radius) * force
+    def force_directional(f, distance, radius)
+    	return (distance / radius) * f
     end
 
-    def acceleration(force, mass)
-    	return (force / mass)
+    def acceleration(f, mass)
+    	return (f / mass)
     end
 
     def distance(v, v0)
@@ -63,10 +65,10 @@ class Body
             dx = how_far(self, body)[0]
             dy = how_far(self, body)[1]
 
-            f = force(mass, body.mass, radius)
+            f = forcex(mass, body.mass, radius)
 
             fx += force_directional(f, dx, radius)
-            fy += force_directional(f, dy, radius)
+            fy -= force_directional(f, dy, radius)
 
             f = 0.0
         end
@@ -83,11 +85,23 @@ class Body
         ax = acceleration(force[0], mass)
         ay = acceleration(force[1], mass)
 
-        self.vx = velocity(ax, v0x)
-        self.vy = velocity(ay, v0y)
+        self.vel_x = velocity(ax, v0x)
+        self.vel_y = velocity(ay, v0y)
 
-        self.x += distance(v0x, vx)
-        self.y += distance(v0y, vy)
+        self.x += distance(v0x, vel_x)
+        self.y -= distance(v0y, vel_y)
+    end
+
+    def convert(radius)
+        x_coordinate = ((320 * @x) / radius) + 320
+        y_coordinate = ((320 * @y) / radius) + 320
+        return x_coordinate, y_coordinate
+    end
+
+    def draw(radius)
+        image = Gosu::Image.new("images/#{@image}")
+        x_coordinate, y_coordinate = convert(radius)
+        image.draw(x_coordinate, y_coordinate, ZOrder::Body)
     end
 
 end
