@@ -10,6 +10,8 @@ class Body
 	def initialize(x, y, vel_x, vel_y, mass, image)
         @x = x.to_f
         @y = y.to_f
+        @x_coordinate = 0
+        @y_coordinate = 0
         @vel_x = vel_x.to_f
         @vel_y = vel_y.to_f
         @mass = mass.to_f
@@ -46,8 +48,8 @@ class Body
     	return (f / mass)
     end
 
-    def distance(v, v0)
-    	return v0 + (v * 25000)
+    def distance(v, d0)
+    	return d0 + (v * 25000)
     end
 
     def velocity(a, v0)
@@ -55,7 +57,7 @@ class Body
     end
 
     def calculate_force(bodies)
-        f, fx, fy, dx, dy, r = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        fx, fy, dx, dy, r = 0.0, 0.0, 0.0, 0.0, 0.0
         
         bodies.each do |body|
             if body == self
@@ -69,8 +71,6 @@ class Body
 
             fx += force_directional(f, dx, radius)
             fy -= force_directional(f, dy, radius)
-
-            f = 0.0
         end
 
         return [fx, fy]
@@ -88,8 +88,8 @@ class Body
         self.vel_x = velocity(ax, v0x)
         self.vel_y = velocity(ay, v0y)
 
-        self.x += distance(v0x, vel_x)
-        self.y -= distance(v0y, vel_y)
+        self.x += distance(vel_x, @x_coordinate)
+        self.y -= distance(vel_y, @y_coordinate)
     end
 
     def convert(radius)
@@ -100,8 +100,8 @@ class Body
 
     def draw(radius)
         image = Gosu::Image.new("images/#{@image}")
-        x_coordinate, y_coordinate = convert(radius)
-        image.draw(x_coordinate, y_coordinate, ZOrder::Body)
+        @x_coordinate, @y_coordinate = convert(radius)
+        image.draw(@x_coordinate, @y_coordinate, ZOrder::Body)
     end
 
 end

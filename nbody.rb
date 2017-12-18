@@ -18,17 +18,13 @@ class NbodySimulation < Gosu::Window
     bodies = []
     line_num = 0
     File.open("./simulations/#{filename}").each do |line|
+      bodies_counted = 0
       body_property = line.split(" ")
       if line == ""
         next
       end
       if body_property[0] == "Creator" || body_property[0] == "//"
         break
-      end
-      if line[0,1] != "-"
-        if is_i?(line[0,1]) == false
-          next
-        end
       end
       if line_num == 0 
         number_of_bodies = line.to_i
@@ -37,14 +33,13 @@ class NbodySimulation < Gosu::Window
         radius = line.to_f
         line_num += 1
       else
-        bodies.push(Body.new(body_property[0], body_property[1], body_property[2], body_property[3], body_property[4], body_property[5]))
+        if body_property[0] != nil && bodies_counted <= number_of_bodies
+          bodies.push(Body.new(body_property[0], body_property[1], body_property[2], body_property[3], body_property[4], body_property[5]))
+          bodies_counted += 1
+        end
       end
     end
     return bodies, radius
-  end
-
-  def is_i?(string)
-    !!(string =~ /\A[-+]?[0-9]+\z/)
   end
 
   def update
