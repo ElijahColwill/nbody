@@ -20,9 +20,6 @@ class NbodySimulation < Gosu::Window
     File.open("./simulations/#{filename}").each do |line|
       bodies_counted = 0
       body_property = line.split(" ")
-      if line == ""
-        next
-      end
       if body_property[0] == "Creator" || body_property[0] == "//"
         break
       end
@@ -34,7 +31,7 @@ class NbodySimulation < Gosu::Window
         line_num += 1
       else
         if body_property[0] != nil && bodies_counted <= number_of_bodies
-          bodies.push(Body.new(body_property[0], body_property[1], body_property[2], body_property[3], body_property[4], body_property[5]))
+          bodies.push(Body.new(body_property[0], body_property[1], body_property[2], body_property[3], body_property[4], body_property[5], #body_property[6], body_property[7], body_property[8])) add three more for radius and z and vel_z 
           bodies_counted += 1
         end
       end
@@ -44,6 +41,12 @@ class NbodySimulation < Gosu::Window
 
   def update
     @bodies.each do |body|
+#     body2, didCollide = body.collide(@bodies) 
+#     if didCollide
+#        bodies.push(Body.new(body.x, body.y, body.z, body.vel_x, body.vel_y, body.vel_z, (body.r / 2), body.mass, body.image))
+#        bodies.push(Body.new(body2.x, body2.y, body2.z, body2.vel_x, body2.vel_y, body2.vel_z, (body2.r / 2), body2.mass, body2.image))
+#        # move both bodies in a random direction away from each other (modify vel_x/y/z or x/y/z?? new method in body??)
+#     end
       body.set_coordinates(@bodies)
     end
   end
